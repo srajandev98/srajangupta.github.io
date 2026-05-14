@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "docusaurus start",
-    "build": "docusaurus build && mkdir -p ../docs/ && cp -R build/* ../docs/",
+    "build:clean": "rm -rf ../docs && mkdir -p ../docs && cp -R build/* ../docs/",
+    "build": "docusaurus build && npm run build:clean",
     "serve": "docusaurus serve",
     "clear": "docusaurus clear"
   },

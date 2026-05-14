@@ -5,7 +5,7 @@ const config = {
   tagline: 'S3-inspired distributed object storage documentation',
 
   url: 'https://srajangupta.github.io',
-  baseUrl: '/projects/distributed-object-storage/',
+  baseUrl: '/projects/distributed-object-storage/docs/',
 
   organizationName: 'srajandev98',
   projectName: 'srajangupta.github.io',
