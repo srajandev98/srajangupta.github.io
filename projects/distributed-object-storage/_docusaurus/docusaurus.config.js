@@ -4,11 +4,11 @@ const config = {
   title: 'Distributed Object Storage',
   tagline: 'S3-inspired distributed object storage documentation',
 
-  url: 'https://srajangupta.github.io',
+  url: 'https://srajangupta.com',
   baseUrl: '/projects/distributed-object-storage/docs/',
 
-  organizationName: 'srajandev98',
-  projectName: 'srajangupta.github.io',
+  organizationName: 'Srajan Gupta',
+  projectName: 'Distributed Object Storage',
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -77,7 +77,7 @@ const config = {
           ],
         },
       ],
-      copyright: `Copyright ${new Date().getFullYear()} Srajan Gupta`,
+      copyright: `Copyright © ${new Date().getFullYear()} Srajan Gupta`,
     },
   },
 };
