@@ -45,11 +45,6 @@ const config = {
       title: 'Distributed Object Storage',
       items: [
         {
-          href: 'https://srajangupta.com',
-          label: 'Home',
-          position: 'left',
-        },
-        {
           to: '/',
           label: 'Docs',
           position: 'left',
@@ -57,6 +52,11 @@ const config = {
         {
           href: 'https://github.com/srajandev98/distributed-object-storage',
           label: 'GitHub',
+          position: 'right',
+        },
+        {
+          href: 'https://srajangupta.com',
+          label: 'Home',
           position: 'right',
         },
       ],

@@ -3,7 +3,7 @@
  */
 const sidebars = {
   docsSidebar: [
-    'README',
+    'introduction',
     'getting-started',
     'user-guide',
     'api-reference',

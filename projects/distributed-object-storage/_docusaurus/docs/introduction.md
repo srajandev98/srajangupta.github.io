@@ -2,7 +2,7 @@
 slug: /
 ---
 
-# Distributed Object Storage
+# Introduction
 
 S3-inspired distributed object storage service docs.
 
