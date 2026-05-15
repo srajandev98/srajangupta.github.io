@@ -8,10 +8,22 @@ curl -X POST \
   http://localhost:8080/upload/my-bucket/docs/sample.txt
 ```
 
+Expected behavior:
+
+- primary object file written to node1
+- metadata row created
+- replication job queued
+
 ## Presign
 
 ```bash
 curl http://localhost:8080/presign/my-bucket/docs/sample.txt
+```
+
+Expected response:
+
+```json
+{"url":"/download/my-bucket/docs/sample.txt?expires=...&signature=..."}
 ```
 
 ## Download
@@ -22,3 +34,14 @@ Use the URL returned by presign:
 curl "http://localhost:8080/download/my-bucket/docs/sample.txt?expires=...&signature=..."
 ```
 
+## Invalid Path Example (Should Fail)
+
+```bash
+curl -X POST \
+  --data-binary @./sample.txt \
+  http://localhost:8080/upload/my-bucket/docs/../../secret.txt
+```
+
+Expected result:
+
+- `400 Bad Request` due to path validation.
