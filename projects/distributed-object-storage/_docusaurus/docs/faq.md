@@ -2,27 +2,24 @@
 
 ## Is this S3-compatible today?
 
-No. It is S3-inspired and currently in MVP build stage.
-The focus today is reliable core behavior before broad API parity.
+No. It is S3-inspired and currently focused on a reliable core before broad API parity.
+
+## What does upload success actually mean?
+
+It means the primary copy exists, metadata is committed, and replication intent is durable. It does not mean all secondary replicas already exist.
 
 ## Does it support multipart upload?
 
-Not yet. Planned for post-MVP expansion.
+Not yet.
 
 ## Is replication durable?
 
-Yes, replication jobs are persisted in PostgreSQL and retried on failure.
+Yes. Replication jobs are persisted in PostgreSQL and retried on failure.
 
 ## How are duplicate replica writes handled?
 
-Idempotency is enforced through DB constraints and conflict-safe writes.
+The worker is designed for at-least-once execution, so replica persistence uses idempotent constraints and conflict-safe writes.
 
-## What consistency model does download use?
+## Why not wait for all replicas before upload response?
 
-Download resolves latest version from metadata (`objects.is_latest = TRUE`) and serves that version.
-Secondary-node replication is asynchronous, so replica convergence is eventual.
-
-## Why not replicate synchronously before upload response?
-
-That would increase client latency and couple availability to every replica node.
-Current design acknowledges upload after durable primary + metadata + replication intent, then processes replicas in background.
+That would couple write availability and latency to every secondary node. The current design chooses durable primary acknowledgement plus asynchronous convergence.

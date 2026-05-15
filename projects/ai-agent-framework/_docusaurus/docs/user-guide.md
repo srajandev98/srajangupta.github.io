@@ -1,24 +1,38 @@
 # User Guide
 
-## Core Concepts
+## Choose A Workflow Style
 
-- **Runnable**: a unit with `invoke` + `pipe`.
-- **Chain**: composition of runnables into deterministic pipelines.
-- **PromptTemplate**: runtime prompt formatting using named placeholders.
-- **OutputParser**: conversion from raw model text into structured outputs.
-- **Agent Runtime**: iterative loop that can execute tools and continue until final response.
+| Need | Use |
+| --- | --- |
+| fixed input-to-output pipeline | chain |
+| model may need external actions | agent |
+| multiple named values from one input | `RunnableMap` |
+| independent branches | `RunnableParallel` |
+| provider model inside a chain | `ModelRunnable` |
 
-## Choosing the Right Primitive
+## Chains
 
-- Use `RunnableLambda` for custom transformation logic.
-- Use `RunnableMap` when one input needs multiple named derived values.
-- Use `RunnableParallel` for independent branches that can run concurrently.
-- Use `RunnablePassthrough` when downstream stage needs the original input unchanged.
-- Use `ModelRunnable` when adapting a provider model into runnable pipelines.
+Use chains for predictable workflows such as extraction, classification, rewriting, and structured generation.
 
-## Error Handling Pattern
+Typical shape:
 
-The framework exposes explicit error types:
+```text
+input -> prompt -> model -> parser
+```
+
+## Agents
+
+Use agents when a response may require one or more tool calls before completion.
+
+Typical shape:
+
+```text
+user input -> model -> tool call or final response -> repeat until final
+```
+
+## Error Handling
+
+Framework errors include:
 
 - `ModelError`
 - `ToolNotFoundError`
@@ -27,14 +41,11 @@ The framework exposes explicit error types:
 - `PromptTemplateError`
 - `OutputParserError`
 
-Recommended pattern:
+Handle them at the application boundary and convert them into user-safe responses as needed.
 
-1. catch framework errors at application boundary
-2. map to user-safe messages
-3. log full error and `cause` for diagnostics
+## Testing
 
-## Testing Recommendations
-
-- Unit test each runnable in isolation.
-- Add contract tests for chain behavior and parser guarantees.
-- Keep one golden-path example that always compiles and runs.
+- test runnables independently
+- test parser output shape
+- test tool validation failures
+- keep end-to-end examples for core flows

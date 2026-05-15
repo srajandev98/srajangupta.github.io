@@ -1,54 +1,36 @@
 # User Guide
 
-## Concepts
+## Object Lifecycle
 
-- **Bucket**: logical namespace for object ownership and listing boundaries.
-- **Object Key**: canonical object identifier inside a bucket. Key format is validated at ingress.
-- **Versioning**: each upload creates a new immutable object version and marks prior version as non-latest.
-- **Presigned URL**: time-limited signed URL authorizing download access without long-lived credentials.
+1. Upload bytes to `/upload/{bucket}/{objectKey}`.
+2. The service writes the primary object and stores metadata.
+3. A replication job is persisted for secondary copies.
+4. Request `/presign/{bucket}/{objectKey}` when a client needs temporary download access.
+5. Download the latest version through the signed URL.
 
-## Current Guarantees
+## Operation Guarantees
 
-- Durable metadata in PostgreSQL
-- Asynchronous replication via durable jobs
-- At-least-once job processing with idempotent replica records
+| Operation | Success Means |
+| --- | --- |
+| Upload | primary file stored, metadata committed, replication job durable |
+| Presign | a time-limited download URL was generated |
+| Download | the latest metadata-selected version was returned |
 
-### What These Guarantees Mean in Practice
+## Versioning
 
-1. Upload acknowledgement means primary write + metadata transaction succeeded.
-2. Secondary replicas may complete slightly later because replication is asynchronous.
-3. Worker retries can replay the same logical work safely because replica persistence is idempotent.
+Each upload creates a new immutable version. Reads resolve the version currently marked as latest in metadata.
 
-## Consistency Model (Current)
+## Replication Behavior
 
-- **Read path** (`/download`) serves the latest version recorded in metadata.
-- **Replication path** is eventually consistent across secondary nodes.
-- **Metadata** is authoritative for object existence and version selection.
+Replication is asynchronous. Uploads do not wait for every secondary node before returning success. Use replication-job state when you need to know whether copies have converged.
 
-This is intentionally a pragmatic MVP model: strong metadata durability plus eventual replica convergence.
+## Path Rules
 
-## Object Path Rules
-
-For security and deterministic storage behavior:
-
-- bucket names must match strict safe pattern rules
-- object keys reject traversal patterns (e.g. `..`)
-- absolute-path and backslash style inputs are rejected
-
-This prevents filesystem escape and cross-node path ambiguity.
-
-## Upload-to-Download Lifecycle
-
-1. Client uploads object bytes.
-2. Service stores primary file on node1.
-3. Service writes metadata and replication job in a single DB transaction.
-4. Worker claims the job and attempts replication to node2/node3.
-5. Client obtains presigned URL and downloads latest version.
+Bucket names and object keys are validated before storage operations. Traversal paths, absolute paths, and unsupported path styles are rejected.
 
 ## Current Limitations
 
-- No multipart upload yet
-- No API key auth yet
-- No bucket lifecycle or policy controls yet
-
-See [MVP Roadmap](mvp-roadmap.md) for execution order and planned milestones.
+- no multipart upload
+- no API-key authentication
+- no bucket lifecycle or policy controls
+- no streaming upload path yet

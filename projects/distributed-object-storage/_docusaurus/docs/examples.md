@@ -1,40 +1,42 @@
 # Examples
 
-## Upload
+## Upload An Object
 
 ```bash
 curl -X POST \
   --data-binary @./sample.txt \
+  -H "Content-Type: text/plain" \
   http://localhost:8080/upload/my-bucket/docs/sample.txt
 ```
 
-Expected behavior:
-
-- primary object file written to node1
-- metadata row created
-- replication job queued
-
-## Presign
+## Create A Presigned Download URL
 
 ```bash
 curl http://localhost:8080/presign/my-bucket/docs/sample.txt
 ```
 
-Expected response:
+Example response:
 
 ```json
 {"url":"/download/my-bucket/docs/sample.txt?expires=...&signature=..."}
 ```
 
-## Download
-
-Use the URL returned by presign:
+## Download The Latest Version
 
 ```bash
 curl "http://localhost:8080/download/my-bucket/docs/sample.txt?expires=...&signature=..."
 ```
 
-## Invalid Path Example (Should Fail)
+## Inspect Replication Progress
+
+```sql
+SELECT id, status, attempt_count, next_run_at, last_error
+FROM replication_jobs
+ORDER BY id DESC
+LIMIT 20;
+```
+
+## Invalid Object Path
 
 ```bash
 curl -X POST \
@@ -44,4 +46,4 @@ curl -X POST \
 
 Expected result:
 
-- `400 Bad Request` due to path validation.
+- `400 Bad Request`

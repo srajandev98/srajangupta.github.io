@@ -1,16 +1,25 @@
 # Examples
 
-## 1) Basic Runnable Chain
+These examples are meant to be adapted into real applications, not only read as API snippets.
+
+## 1. Structured Extraction
+
+Use this when your app needs predictable JSON rather than prose.
 
 ```ts
-const chain = prompt
-  .pipe(model)
-  .pipe(parser);
+const chain = prompt.pipe(model).pipe(parser);
+const result = await chain.invoke({ ticket: "Payment failed twice" });
 ```
 
-Use when you need linear prompt -> model -> parse flow.
+Good fits:
 
-## 2) Input Enrichment with `RunnableMap`
+- support ticket triage
+- document metadata extraction
+- moderation labels
+
+## 2. Input Enrichment With `RunnableMap`
+
+Use this when one raw input needs to become several prompt variables.
 
 ```ts
 const inputMap = new RunnableMap({
@@ -19,9 +28,15 @@ const inputMap = new RunnableMap({
 });
 ```
 
-Use when prompt needs multiple derived fields.
+Good fits:
 
-## 3) Parallel Branches
+- normalizing user input
+- injecting defaults
+- combining user data with app policy
+
+## 3. Independent Branches With `RunnableParallel`
+
+Use this when multiple calculations can happen from the same input without waiting on one another.
 
 ```ts
 const parallel = new RunnableParallel({
@@ -30,10 +45,30 @@ const parallel = new RunnableParallel({
 });
 ```
 
-Use for independent transformations that can run concurrently.
+Good fits:
 
-## 4) Tool-Based Agent
+- feature extraction
+- side-by-side scoring
+- parallel preprocessing
 
-Use `Agent` + `tool(...)` when model must call external capabilities.
+## 4. Tool-Based Agent
 
-Prefer chain-only architecture until tool reasoning is needed.
+Use `Agent` + `tool(...)` when the model may need external information before it can answer.
+
+Good fits:
+
+- weather lookup
+- CRM lookup
+- calendar or ticket actions
+
+Prefer a chain-only design until your task truly needs tool choice or a reasoning loop.
+
+## 5. Choosing Between Chain And Agent
+
+| Scenario | Better Fit |
+| --- | --- |
+| summarize text into JSON | chain |
+| classify support tickets | chain |
+| answer using a fixed retrieved context | chain |
+| decide whether to call weather or search | agent |
+| execute multi-step tool workflows | agent |

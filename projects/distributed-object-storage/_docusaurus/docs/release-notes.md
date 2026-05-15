@@ -2,16 +2,21 @@
 
 ## 2026-05-15
 
-- Refactored into `cmd/server` and `internal/*` package structure
-- Added durable PostgreSQL replication jobs
-- Implemented retry with terminal failure state
-- Added DB-level idempotency + state transition guards
-- Added unit tests for upload and replication failure paths
-- Added strict path validation for bucket and object keys
+### Added
 
-### Engineering Impact
+- durable PostgreSQL replication jobs
+- retry handling with terminal failure state
+- DB-level idempotency and guarded state transitions
+- strict bucket/object-key validation
+- tests for upload and replication failure paths
 
-- **Reliability**: replication survives restarts because jobs are persisted.
-- **Correctness**: guarded state transitions reduce race-induced invalid updates.
-- **Safety**: path sanitization blocks filesystem traversal class vulnerabilities.
-- **Maintainability**: layered package structure improves testability and change isolation.
+### Changed
+
+- reorganized runtime into `cmd/server` and `internal/*`
+
+### Why It Matters
+
+- replication work now survives process restarts
+- duplicate retry execution is safer
+- traversal-style paths are rejected at ingress
+- the package layout is easier to test and evolve

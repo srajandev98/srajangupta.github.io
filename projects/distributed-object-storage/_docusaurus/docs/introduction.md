@@ -4,55 +4,52 @@ slug: /
 
 # Distributed Object Storage
 
-Distributed Object Storage is an S3-inspired system focused on reliability-first design:
+Distributed Object Storage is an S3-inspired object storage service for storing versioned files, issuing presigned download URLs, and replicating objects asynchronously across storage nodes.
 
-- durable metadata persistence
-- durable replication scheduling
-- explicit failure handling and retries
-- strict input validation on all object paths
+## Key Capabilities
 
-The project is currently in MVP execution mode. The goal is to complete a production-worthy core (correctness, safety, observability, and operations) before expanding into broader S3-compatible feature breadth.
+- object upload by bucket and key
+- immutable object versions with latest-version reads
+- presigned download URLs
+- PostgreSQL-backed metadata
+- durable asynchronous replication jobs
+- strict bucket and object-key validation
 
-## What This Documentation Covers
+## When To Use It
 
-This documentation is designed for three audiences:
+Use Distributed Object Storage when you need:
 
-1. Users who want to run and use the service.
-2. Engineers who want to understand internal architecture and guarantees.
-3. Contributors who want to implement roadmap items safely.
+- a file/object API rather than block or database storage
+- temporary signed download access
+- versioned object writes
+- durable replication work that can survive worker restarts
 
-If you are new, start with:
+## Core Concepts
 
-- [Getting Started](getting-started.md)
-- [User Guide](user-guide.md)
-- [API Reference](api-reference.md)
+| Concept | Meaning |
+| --- | --- |
+| Bucket | namespace for stored objects |
+| Object key | object identifier within a bucket |
+| Version | immutable uploaded revision of an object |
+| Presigned URL | temporary signed download URL |
+| Replication job | durable background task for secondary copies |
 
-If you are implementing or reviewing changes, start with:
+## Current Scope
 
-- [Architecture](architecture.md)
-- [Data Protection and Durability](data-protection-and-durability.md)
-- [Monitoring and Troubleshooting](monitoring-and-troubleshooting.md)
+The current release provides the core upload, presign, download, versioning, and replication workflow. It is not yet fully S3-compatible and does not yet include multipart upload, API-key authentication, lifecycle policies, or production-grade observability.
 
-## Current Implementation Snapshot
+## Documentation
 
-As of the latest release:
-
-- Upload, presign, and download APIs are implemented.
-- Object metadata is stored in PostgreSQL.
-- Replication is asynchronous and durable via `replication_jobs`.
-- Worker processing is at-least-once with retry and terminal failure.
-- Replica writes are idempotent via DB constraints.
-- Object path validation blocks traversal-style keys.
-
-Pending MVP priorities:
-
-- Streaming upload path (bounded memory ingest)
-- Upload request-size controls
-- Migration-based schema lifecycle
-- API key authentication and scoped authorization
+1. [Getting Started](getting-started.md): run the service and complete the first object flow.
+2. [User Guide](user-guide.md): product behavior and common workflows.
+3. [Examples](examples.md): practical API examples.
+4. [API Reference](api-reference.md): endpoint contract.
+5. [Security and Access](security-and-access.md): current controls and gaps.
+6. [Data Protection and Durability](data-protection-and-durability.md): replication guarantees.
+7. [Monitoring and Troubleshooting](monitoring-and-troubleshooting.md): operational checks.
 
 ## Source of Truth
 
-- [Execution Plan (PLAN.md)](https://github.com/srajandev98/distributed-object-storage/blob/main/PLAN.md)
+- [Execution Plan](https://github.com/srajandev98/distributed-object-storage/blob/main/PLAN.md)
 - [Repository README](https://github.com/srajandev98/distributed-object-storage/blob/main/README.md)
 - [Release Notes](release-notes.md)

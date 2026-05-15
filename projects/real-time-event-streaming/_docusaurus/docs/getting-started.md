@@ -1,29 +1,27 @@
 # Getting Started
 
+This guide shows how to run the broker, publish events, consume them, and track consumer progress.
+
 ## Requirements
 
 - Go `1.22+`
-- A terminal client such as `nc` for manually testing the TCP protocol
+- `nc` (netcat) for manual TCP requests
 
-## Start the broker
-
-From the repository root:
+## Start The Broker
 
 ```bash
 go run ./cmd/broker
 ```
 
-The broker listens on port `9092` by default.
+The broker listens on `localhost:9092` by default.
 
-## Produce messages
-
-Open a TCP connection:
+## Connect A Client
 
 ```bash
 nc localhost 9092
 ```
 
-Then send framed protocol requests:
+## Publish Events
 
 ```text
 V1|1|PRODUCE|orders user1:created
@@ -31,52 +29,45 @@ V1|2|PRODUCE|orders user1:paid
 V1|3|PRODUCE|orders user2:shipped
 ```
 
-A successful response includes the request correlation ID:
+Example response:
 
 ```text
 V1|1|OK|partition=2 offset=0
 ```
 
-## Consume messages
+The broker selects a partition from the message key and returns the assigned offset.
+
+## Consume Events
 
 ```text
 V1|4|CONSUME|orders 2 0
 ```
 
-This reads from topic `orders`, partition `2`, starting at offset `0`.
+This reads topic `orders`, partition `2`, starting at offset `0`.
 
-## Work with consumer groups
-
-Join a group:
+## Use A Consumer Group
 
 ```text
 V1|5|JOIN|analytics orders consumer-a
-```
-
-Commit an offset:
-
-```text
 V1|6|COMMIT|analytics orders 2 1
-```
-
-Fetch the committed offset:
-
-```text
 V1|7|OFFSET|analytics orders 2
 ```
 
-## Run tests
+- `JOIN` assigns partitions to a consumer.
+- `COMMIT` stores processed progress.
+- `OFFSET` reads the last committed offset.
+
+## Common Usage Patterns
+
+| Goal | Pattern |
+| --- | --- |
+| keep events for one entity ordered | use that entity ID as the message key |
+| replay historical events | consume from an earlier offset |
+| resume after restart | read the committed group offset |
+| share work across consumers | use the same consumer group |
+
+## Run Tests
 
 ```bash
 go test ./...
 ```
-
-## What to expect today
-
-The current broker is intentionally small:
-
-- single-process runtime
-- local filesystem persistence
-- text-based protocol
-- simplified replication model
-- no authentication, retention, batching, compression, or cluster control plane yet

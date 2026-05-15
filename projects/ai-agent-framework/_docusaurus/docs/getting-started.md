@@ -1,10 +1,10 @@
 # Getting Started
 
-## Prerequisites
+## Requirements
 
 - Node.js `24+`
 - pnpm `11+`
-- OpenAI API key (for provider examples)
+- OpenAI API key for provider examples
 
 ## Install
 
@@ -14,24 +14,13 @@ cd ai-agent-framework
 pnpm install
 ```
 
-## Validate Local Setup
-
-```bash
-pnpm lint
-pnpm test --run
-pnpm --filter @ai-agent-framework/core build
-pnpm --filter @ai-agent-framework/openai build
-```
-
-## Environment
-
-Create `.env` in project root for playground/provider usage:
+## Configure Provider Access
 
 ```env
 OPENAI_API_KEY=your_api_key_here
 ```
 
-## First Runnable Chain
+## Build A Runnable Chain
 
 ```ts
 import {
@@ -53,14 +42,15 @@ const prompt = new PromptTemplate<{ topic: string; tone: string }>({
     "In a {tone} tone, return valid JSON only with keys {\"summary\": string, \"score\": number} about {topic}."
 });
 
-const model = new ModelRunnable(openai({ model: "gpt-4o-mini" }));
-const parser = new JsonOutputParser<{ summary: string; score: number }>();
+const chain = inputMap
+  .pipe(prompt)
+  .pipe(new ModelRunnable(openai({ model: "gpt-4o-mini" })))
+  .pipe(new JsonOutputParser<{ summary: string; score: number }>());
 
-const chain = inputMap.pipe(prompt).pipe(model).pipe(parser);
 const result = await chain.invoke({ topic: "TypeScript" });
 ```
 
-## First Agent Run
+## Build A Tool-Using Agent
 
 ```ts
 import { z } from "zod";
@@ -83,4 +73,13 @@ const agent = new Agent({
 });
 
 const output = await agent.run("What is the weather in Delhi?");
+```
+
+## Validate The Repository
+
+```bash
+pnpm lint
+pnpm test --run
+pnpm --filter @ai-agent-framework/core build
+pnpm --filter @ai-agent-framework/openai build
 ```

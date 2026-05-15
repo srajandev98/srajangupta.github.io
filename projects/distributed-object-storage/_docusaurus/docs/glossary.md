@@ -1,9 +1,10 @@
 # Glossary
 
-- **At-least-once processing**: worker may execute the same logical job multiple times; safe systems must tolerate replay.
-- **Idempotency**: applying same operation repeatedly produces the same logical end state.
-- **Replication lag**: time between primary commit and secondary-replica completion.
-- **Presigned URL**: URL containing temporary access authorization derived from a signature and expiry time.
-- **State transition guard**: DB update condition that only permits legal state changes (for example `running -> completed` only if current status is `running`).
-- **Outbox-style durability**: pattern where intent for asynchronous work is written durably in same transaction as primary state change.
-- **Terminal failure**: final non-retry job state reached after exhausting configured retry attempts.
+- **At-least-once processing**: a worker may execute the same logical job more than once.
+- **Idempotency**: repeating an operation produces the same logical end state.
+- **Latest version**: the object version currently selected for normal download reads.
+- **Presigned URL**: temporary signed URL that grants download access without permanent credentials.
+- **Replication lag**: time between primary commit and secondary-copy completion.
+- **State transition guard**: database condition that only allows legal state changes.
+- **Outbox-style durability**: storing asynchronous work intent durably with the primary state change.
+- **Terminal failure**: final non-retry job state after exhausting attempts.

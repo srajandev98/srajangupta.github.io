@@ -4,44 +4,46 @@ slug: /
 
 # AI Agent Framework
 
-AI Agent Framework is a TypeScript framework for building AI applications with composable primitives and an agent runtime.
+AI Agent Framework is a TypeScript framework for building AI chains and tool-using agents from composable primitives.
 
-The project is currently focused on a practical MVP:
+## Key Capabilities
 
-- runnable-based composition (`RunnableLambda`, `RunnableSequence`, `RunnableParallel`, `RunnableMap`)
-- prompt and output parser layers
-- model adapter runnable
-- tool-capable agent runtime
+- runnable composition for deterministic workflows
+- prompt templates and output parsers
+- model adapters for provider integration
+- agent runtime with tool execution
+- typed building blocks for application code
 
-## What This Documentation Covers
+## When To Use It
 
-This documentation is designed for three audiences:
+Use AI Agent Framework when you need to:
 
-1. Developers integrating the framework into AI apps.
-2. Contributors extending primitives and runtime behavior.
-3. Reviewers validating architecture and release quality.
+- build structured prompt/model/parser pipelines
+- compose reusable AI workflow stages
+- add tool calling to an assistant
+- keep provider integration separate from application flow
 
-If you are new, start with:
+## Core Concepts
 
-- [Getting Started](getting-started.md)
-- [User Guide](user-guide.md)
-- [Examples](examples.md)
+| Concept | Meaning |
+| --- | --- |
+| Runnable | executable composable unit |
+| Chain | fixed sequence of runnables |
+| Prompt template | formatter for prompt variables |
+| Output parser | converter from model text to application output |
+| Agent | runtime that can call tools before returning a response |
 
-If you are implementing or reviewing changes, start with:
+## Current Scope
 
-- [Architecture](architecture.md)
-- [API Reference](api-reference.md)
-- [MVP Roadmap](mvp-roadmap.md)
+The current MVP includes runnable composition, prompt templates, parsers, OpenAI provider integration, and a tool-capable agent runtime. Retriever primitives, richer memory support, and additional provider adapters remain planned work.
 
-## Current MVP Snapshot
+## Documentation
 
-As of `v0.1.0-mvp`:
-
-- Runnable composition works end-to-end.
-- Prompt formatting and JSON parsing layers are available.
-- OpenAI provider adapter is integrated.
-- Agent runtime supports tool execution and memory context loop.
-- Core behavior is covered by unit tests and contract tests.
+1. [Getting Started](getting-started.md): install and run the first chain and agent.
+2. [User Guide](user-guide.md): choose primitives for common use cases.
+3. [Examples](examples.md): practical usage patterns.
+4. [API Reference](api-reference.md): public API surface.
+5. [Architecture](architecture.md): runtime behavior.
 
 ## Source of Truth
 

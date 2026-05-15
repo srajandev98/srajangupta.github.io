@@ -1,35 +1,18 @@
 # API Reference
 
+Use this page when you already understand the concepts and need the current public surface at a glance.
+
 ## Runnables
 
-### `Runnable<I, O>`
-
-- `invoke(input: I): Promise<O>`
-- `pipe(next: Runnable<O, NextOutput>): Runnable<I, NextOutput>`
-
-### `RunnableLambda<I, O>`
-
-Wraps a sync/async function as runnable.
-
-### `RunnableSequence<I, O>`
-
-Runs runnable steps in order.
-
-### `RunnableParallel<I, TMap>`
-
-Runs multiple runnable branches with same input and returns merged object.
-
-### `RunnableMap<I, TMap>`
-
-Builds named object output by mapping one input into multiple runnable fields.
-
-### `RunnablePassthrough<T>`
-
-Identity runnable that returns input as-is.
-
-### `ModelRunnable`
-
-Adapter from `Model` to runnable (`string -> string`).
+| API | Use |
+| --- | --- |
+| `Runnable<I, O>` | base contract with `invoke` and `pipe` |
+| `RunnableLambda<I, O>` | wrap sync or async custom logic |
+| `RunnableSequence<I, O>` | run steps in order |
+| `RunnableParallel<I, TMap>` | run branches from the same input concurrently |
+| `RunnableMap<I, TMap>` | build a named object from one input |
+| `RunnablePassthrough<T>` | return input unchanged |
+| `ModelRunnable` | adapt `Model` into a `string -> string` runnable |
 
 ## Prompts
 
@@ -37,26 +20,25 @@ Adapter from `Model` to runnable (`string -> string`).
 
 - input: object of template variables
 - output: formatted prompt string
-- throws: `PromptTemplateError` on missing variable values
+- throws: `PromptTemplateError` when required variables are missing
 
 ## Output Parsers
 
-### `StringOutputParser`
+| API | Behavior |
+| --- | --- |
+| `StringOutputParser` | returns raw text unchanged |
+| `JsonOutputParser<T>` | parses JSON text into typed output |
 
-Pass-through parser for raw text output.
-
-### `JsonOutputParser<T>`
-
-Parses JSON string to typed object.
-
-Throws `OutputParserError` on invalid JSON.
+`JsonOutputParser<T>` throws `OutputParserError` on invalid JSON.
 
 ## Agent Runtime
 
 ### `Agent`
 
-- `new Agent({ model, tools, passes?, hooks?, maxSteps? })`
-- `run(input: string): Promise<string>`
+```ts
+new Agent({ model, tools, passes?, hooks?, maxSteps? })
+agent.run(input: string): Promise<string>
+```
 
 Runtime behavior:
 

@@ -1,59 +1,49 @@
 # Architecture
 
-The codebase is organized around subsystem boundaries rather than UI-facing features.
+Real-time Event Streaming runs as a broker process that accepts TCP requests, routes commands, persists messages, and manages consumer-group state.
+
+## Runtime Components
+
+| Component | Responsibility |
+| --- | --- |
+| `network` | accepts TCP connections and dispatches commands |
+| `protocol` | parses request frames and formats responses |
+| `storage` | routes keys, appends messages, and loads partition logs |
+| `coordinator` | manages group assignments and committed offsets |
+| `broker` | wires runtime components together |
+
+## Request Flow
 
 ```text
-real-time-event-streaming/
-├── cmd/broker/              # application entrypoint
-├── internal/broker/          # composition root
-├── internal/config/          # runtime configuration
-├── internal/network/         # TCP request handling
-├── internal/protocol/        # protocol parsing and response framing
-├── internal/storage/         # append-only logs and reads
-├── internal/coordinator/     # groups and offsets
-└── internal/types/           # shared message types
+Client -> TCP handler -> protocol parser -> storage or coordinator -> response
 ```
 
-## Request flow
+Command routing:
 
 ```text
-Client
-  │
-  ▼
-TCP handler
-  │
-  ▼
-Protocol parser
-  │
-  ├── PRODUCE ──> Storage
-  ├── CONSUME ─> Storage
-  ├── JOIN ─────> GroupManager
-  ├── COMMIT ───> OffsetManager
-  └── OFFSET ───> OffsetManager
+PRODUCE -> storage
+CONSUME -> storage
+JOIN    -> group manager
+COMMIT  -> offset manager
+OFFSET  -> offset manager
 ```
 
-## Subsystem responsibilities
+## Produce Flow
 
-### `broker`
+For:
 
-Wires the core dependencies together. `Broker` owns the storage layer and the coordinator.
+```text
+V1|1|PRODUCE|orders user1:created
+```
 
-### `storage`
+The broker:
 
-Owns topic-partition message storage, deterministic key-to-partition routing, append-only file writes, and startup recovery.
+1. parses the protocol frame
+2. extracts the topic, key, and value
+3. hashes the key to choose a partition
+4. appends the message to the partition log
+5. returns the partition and offset
 
-### `coordinator`
+## Current Deployment Model
 
-Owns consumer-group membership, partition assignment, and persisted offset management.
-
-### `network`
-
-Owns TCP connection handling and command dispatch.
-
-### `protocol`
-
-Owns request parsing, response formatting, correlation IDs, and common integer parsing helpers.
-
-## Current architecture tradeoff
-
-The implementation intentionally keeps several distributed concerns local and synchronous. That makes the architecture easy to understand while the project is still stabilizing the protocol, storage model, and coordination semantics. The roadmap then expands those same boundaries toward segmentation, ISR tracking, leadership, and a quorum-backed control plane.
+The current broker is single-process and stores data on the local filesystem. Distributed metadata, network replication, and broker failover are planned product capabilities rather than current runtime behavior.

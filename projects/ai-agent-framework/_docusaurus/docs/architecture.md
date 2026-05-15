@@ -1,36 +1,35 @@
 # Architecture
 
-## Layered Design
+AI Agent Framework separates workflow composition from provider integration and agent execution.
 
-1. **Primitives**
-   - runnables
-   - prompts
-   - output parsers
+## Components
 
-2. **Model Adapters**
-   - provider-specific wrappers implementing `Model`
-   - `ModelRunnable` bridge for chain usage
+| Component | Responsibility |
+| --- | --- |
+| Runnables | composable execution units |
+| Prompt templates | prompt formatting |
+| Output parsers | conversion from model text to typed output |
+| Model adapters | provider integration |
+| Agent runtime | iterative execution and tool handling |
 
-3. **Agent Runtime**
-   - instruction interpretation
-   - tool execution
-   - memory context propagation
+## Chain Execution
 
-4. **Applications**
-   - playground and downstream products
+```text
+input -> runnable stages -> structured output
+```
 
-## Execution Paths
+Chains run a known sequence of stages.
 
-### Chain Path
+## Agent Execution
 
-`input -> runnable composition -> parsed structured output`
+```text
+input -> model -> tool calls or final response -> repeat
+```
 
-### Agent Path
+Agents can continue across multiple steps until they return a final response or reach `maxSteps`.
 
-`user input -> model nodes -> tool calls/final response -> loop until final`
+## Runtime Behavior
 
-## Why This Structure
+The runtime validates tool arguments, preserves tool-call message ordering, and raises explicit errors for provider failures, invalid tool usage, parser failures, and step-limit exhaustion.
 
-- Keeps primitives reusable outside agent runtime.
-- Allows deterministic testing of chain stages.
-- Keeps provider code isolated from orchestration logic.
+For exact runtime guarantees, see the upstream [Core Contract](https://github.com/srajandev98/ai-agent-framework/blob/main/CORE_CONTRACT.md).

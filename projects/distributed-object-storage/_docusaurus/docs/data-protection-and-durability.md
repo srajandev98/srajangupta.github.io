@@ -1,47 +1,53 @@
-# Data Protection and Durability
+# Data Protection And Durability
 
-## Replication Model
+This page explains exactly what is durable today and where the boundary still stops.
 
-- Primary object content is written first to node1.
-- Metadata + replication work intent is persisted durably in PostgreSQL.
-- Worker asynchronously copies data to node2 and node3.
+## What Is Protected Today
+
+After upload success, the system has:
+
+- a primary object copy
+- durable object metadata in PostgreSQL
+- durable replication intent in `replication_jobs`
+
+That combination means a worker crash does not erase the knowledge that replicas still need to be created.
 
 ## Failure Handling
 
-Replication jobs use controlled transitions and retry:
+Replication jobs follow controlled transitions:
 
-- claim: `pending -> running`
-- transient failure: `running -> pending` with delayed `next_run_at`
-- terminal failure: `running -> failed` at `max_attempts`
-- success: `running -> completed`
+```text
+pending -> running -> completed
+pending -> running -> pending
+pending -> running -> failed
+```
 
-Backoff strategy is currently quadratic by attempt count.
+Retries use backoff, and terminal failure records preserve the fact that work did not complete.
 
-## Idempotency
+## Why Idempotency Matters
 
-At-least-once worker execution means duplicate processing can occur after process restarts or transient errors.
-To make this safe:
+Workers are at-least-once. The same logical work can run again after a crash or retry. To keep replay safe:
 
-- replica writes are conflict-safe
-- replica identity is modeled by object/node uniqueness
-- stale transition attempts are rejected by guarded state updates
+- replica records use conflict-safe persistence
+- replica identity is unique per object and node
+- guarded state updates reject stale transitions
 
-## Durability Boundary (Current MVP)
+## What This Means For Users
 
-What is protected:
+- upload success does not mean every replica already exists
+- a temporary worker outage should delay replication, not lose the job
+- a repeated job should not create duplicate logical replicas
 
-- object metadata durability (PostgreSQL)
-- replication work durability (job table)
+## Not Yet Production-Hardened
 
-What is not fully production-hardened yet:
-
-- cross-node checksum scrub / anti-entropy reconciliation
-- multi-region durability guarantees
+- cross-node checksum scrub
+- anti-entropy repair
+- multi-region durability
 - erasure coding
-- formal RPO/RTO operational drills
+- formal RPO/RTO drills
 
 ## Recovery Expectations
 
-- If worker is down, jobs remain queued and recover once worker resumes.
-- If a job repeatedly fails, it becomes `failed` for manual/automated replay support (replay tooling planned).
-- Primary object availability is independent of secondary replication completion.
+- stopped workers can resume queued jobs later
+- repeated failures end in `failed` for later replay or repair tooling
+- primary availability is independent of secondary completion

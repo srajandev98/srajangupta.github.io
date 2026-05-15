@@ -4,40 +4,53 @@ slug: /
 
 # Real-time Event Streaming
 
-Real-time Event Streaming is a Go project for exploring the internals of distributed log-based messaging systems by building one from scratch.
+Real-time Event Streaming is a Go-based event streaming broker for publishing, storing, and consuming ordered event streams.
 
-The current prototype already demonstrates several core ideas found in systems such as Kafka, Redpanda, Pulsar, and NATS:
+It provides a small streaming platform with:
 
-- append-only partition logs
-- deterministic key-based partitioning
-- offset-based reads
-- consumer groups with round-robin partition assignment
-- persisted offsets
-- simplified local replication
+- append-only topic-partition logs
+- deterministic key-based partition routing
+- offset-based message consumption
+- consumer groups with partition assignment
+- persisted consumer offsets
 
-## What This Documentation Covers
+## When To Use It
 
-This documentation is for three audiences:
+Use Real-time Event Streaming when you need to:
 
-1. Developers who want to run the broker locally and try the wire protocol.
-2. Engineers who want to understand the current subsystem boundaries.
-3. Contributors who want to evolve the prototype toward the production roadmap.
+- publish domain events such as order, payment, or activity updates
+- preserve message order within a partition
+- replay events from a known offset
+- distribute partition work across consumers in a group
 
-If you are new, start with:
+## Product Concepts
 
-- [Getting Started](getting-started.md)
-- [Protocol](protocol.md)
-- [Architecture](architecture.md)
+| Concept | Meaning |
+| --- | --- |
+| Topic | named stream of related events |
+| Partition | ordered shard within a topic |
+| Offset | position of a message within a partition |
+| Consumer group | consumers that share partition ownership |
 
-If you are extending the system, continue with:
+## Current Scope
 
-- [Storage and Replication](storage-and-replication.md)
-- [Roadmap](roadmap.md)
-- [Contributing](contributing.md)
+The current release supports a single-process broker with local file persistence and a text-based TCP protocol. It is suitable for local use, experimentation, and continued product development, but it is not yet a production-grade clustered streaming service.
 
-## Current Status
+Not yet available:
 
-The project is under active development and is **not production-ready** yet. The current codebase is best understood as a deliberately small but working foundation for a future distributed streaming platform.
+- distributed broker replication
+- leader election and metadata quorum
+- retention, compaction, batching, and compression
+- authentication and authorization
+
+## Documentation
+
+1. [Getting Started](getting-started.md): run the broker and publish your first events.
+2. [Protocol](protocol.md): request and response formats.
+3. [Architecture](architecture.md): runtime components and request flow.
+4. [Storage and Replication](storage-and-replication.md): persistence behavior and replication status.
+5. [Roadmap](roadmap.md): planned product capabilities.
+6. [Contributing](contributing.md): development workflow.
 
 ## Source of Truth
 

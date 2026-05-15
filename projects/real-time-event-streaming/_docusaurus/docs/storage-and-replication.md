@@ -1,8 +1,17 @@
 # Storage and Replication
 
-## Storage model
+This page explains how messages are placed on disk, how consumers read them back, and what the current replication model does and does not mean.
 
-Each topic partition is represented by an append-only log file:
+## What You Will Learn
+
+- how topics and partitions map to files
+- how keys choose partitions
+- how offsets make replay possible
+- what replication behavior is and is not available today
+
+## Storage Model
+
+Each topic partition is stored in its own append-only log file:
 
 ```text
 data/orders-0.log
@@ -10,43 +19,79 @@ data/orders-1.log
 data/orders-2.log
 ```
 
-Messages are persisted as offset/value pairs:
+Each line is stored as:
+
+```text
+<offset>:<value>
+```
+
+Example:
 
 ```text
 0:created
 1:paid
 ```
 
-On startup, the storage layer scans existing log files and reconstructs in-memory partition state.
+When the broker starts, it scans existing log files and rebuilds in-memory partition state from those records.
 
 ## Partitioning
 
-The current implementation hashes the message key with FNV-1a and maps the result into the configured partition count. Messages with the same key therefore stay on the same partition, preserving order for that key.
+The storage layer hashes the message key with FNV-1a and maps the result into the configured partition count.
 
-## Reads
+What that means in practice:
 
-Consumers read from an explicit offset within a partition. A read returns all currently available messages from that offset onward.
+- the same key always maps to the same partition for a fixed partition count
+- messages for that key keep their order within that partition
+- different keys may land on different partitions and progress independently
 
-## Consumer offsets
+## Reads and Replay
 
-Consumer progress is managed separately from the logs by the coordinator layer and persisted so committed offsets survive broker restarts.
+Consumers do not ask for “the latest message.” They ask for:
 
-## Replication model
+```text
+<topic> <partition> <offset>
+```
 
-The prototype models:
+A consume call returns all currently available messages from that offset onward. This makes replay possible: reading from offset `0` reprocesses the whole partition log, while reading from a later offset resumes from a known position.
 
-- one leader log per partition
-- additional local replica logs
-- synchronous local replication
+## Consumer Offsets
 
-This is intentionally not yet true distributed replication. The roadmap expands it into:
+Committed consumer progress is stored separately from the log files in:
 
-- follower fetch and replication protocol
+```text
+data/offsets.json
+```
+
+This separation matters because:
+
+- logs represent what exists
+- offsets represent what a consumer group has processed
+
+A broker restart can therefore recover both the data and the last committed progress.
+
+## Replication Status Today
+
+Replication is currently a design target, not a working broker capability in the implementation shown here. The codebase is already shaped to make room for replication work later, but today's executable path is still centered on local partition logs.
+
+## What Replication Still Requires
+
+A production-style replication design would need:
+
+- follower fetch over the network
 - in-sync replica tracking
 - high watermark handling
-- acknowledgement modes
-- leader/follower transitions
+- leader/follower role changes
+- acknowledgement modes such as `acks=1` and `acks=all`
 
-## Current limitations
+## Current Limits
 
-The storage layer does not yet include segmented logs, retention policies, checksums, compression, indexed reads, or crash-hardening suitable for production workloads.
+The storage layer does not yet provide:
+
+- segmented logs
+- retention or compaction
+- checksums
+- indexed reads
+- compression
+- crash-hardening suitable for production workloads
+
+These are storage-engine problems, not just documentation details, and they are tracked in the [roadmap](roadmap.md).

@@ -1,39 +1,30 @@
-# Security and Access
+# Security And Access
 
-## Current Security Controls
+This page distinguishes the security controls that exist now from the ones still required before public deployment.
 
-- HMAC-based presigned URL validation
-- Expiry enforcement on download links
-- Bucket/object path validation to block traversal patterns
+## Implemented Today
 
-## Request-Surface Threats Addressed
+- HMAC-signed presigned download URLs
+- expiry enforcement on download links
+- bucket and object-key validation to block traversal-style paths
 
-Current controls explicitly mitigate:
+## Threats These Controls Address
 
-- path traversal attempts in object keys
-- key canonicalization ambiguity across OS path styles
-- indefinite URL reuse via expiry checks
-- signature tampering of presigned URLs
+- path traversal attempts
+- path canonicalization ambiguity across operating systems
+- indefinite reuse of download links
+- query tampering on presigned URLs
 
-## Current Security Gaps
+## Not Implemented Yet
 
-- no API key auth on upload/presign routes yet
-- no fine-grained authorization policies yet
-- no formal audit trail of all data-plane actions yet
-- no key rotation workflow documented yet
+- API key authentication for upload and presign routes
+- scoped authorization policies
+- audit logging across all data-plane actions
+- documented key rotation workflow
 
-## Planned Controls
+## How To Use The Service Safely Today
 
-- API key authentication
-- Scoped authorization per bucket/action
-- Audit logging for data and control plane actions
-- Signature V4-compatible signing model
-
-## Security Posture Guidance
-
-Until auth is implemented:
-
-- run this service only in trusted/private environments
+- keep it in trusted/private environments
 - do not expose write endpoints publicly
-- rotate `APP_SECRET` in controlled intervals
-- monitor replication/job tables for suspicious or anomalous patterns
+- use a strong `APP_SECRET`
+- treat the current service as an MVP, not an internet-facing storage product
