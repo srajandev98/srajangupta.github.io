@@ -1,21 +1,23 @@
 # Architecture
 
-Real-time Event Streaming runs as a broker process that accepts TCP requests, routes commands, persists messages, and manages consumer-group state.
+Real-time Event Streaming runs as a broker process that accepts TCP requests, validates protocol frames, executes command handlers, and persists state to disk.
 
 ## Runtime Components
 
 | Component | Responsibility |
 | --- | --- |
-| `network` | accepts TCP connections and dispatches commands |
-| `protocol` | parses request frames and formats responses |
-| `storage` | routes keys, appends messages, and loads partition logs |
-| `coordinator` | manages group assignments and committed offsets |
-| `broker` | wires runtime components together |
+| `cmd/broker` | process startup and TCP listener |
+| `network` | per-connection request loop and command routing |
+| `protocol` | `V1` parsing + response formatting |
+| `storage` | segmented logs, indexes, retention, checksum recovery |
+| `coordinator` | group assignment and offset persistence |
+| `logging` | structured JSON logs |
+| `broker` | composition root for storage + coordinator |
 
-## Request Flow
+## Request Lifecycle
 
 ```text
-Client -> TCP handler -> protocol parser -> storage or coordinator -> response
+Client -> network.HandleConnection -> protocol.ParseRequest -> command handler -> storage/coordinator -> protocol response
 ```
 
 Command routing:
@@ -28,22 +30,22 @@ COMMIT  -> offset manager
 OFFSET  -> offset manager
 ```
 
-## Produce Flow
+## Storage Lifecycle
 
-For:
+For each produced message:
 
-```text
-V1|1|PRODUCE|orders user1:created
-```
+1. key is hashed to a partition
+2. message is appended to active segment file
+3. offset/time index entries are appended
+4. simplified local replica segment files are mirrored
+5. retention policy is enforced
 
-The broker:
+On startup:
 
-1. parses the protocol frame
-2. extracts the topic, key, and value
-3. hashes the key to choose a partition
-4. appends the message to the partition log
-5. returns the partition and offset
+1. segment files are scanned in order
+2. checksums are validated per record
+3. valid records rebuild in-memory partition state
 
-## Current Deployment Model
+## Operational Scope
 
-The current broker is single-process and stores data on the local filesystem. Distributed metadata, network replication, and broker failover are planned product capabilities rather than current runtime behavior.
+Current architecture is single-broker with local disk durability and local replica mirrors. Distributed metadata control and network replication are planned in upcoming phases.

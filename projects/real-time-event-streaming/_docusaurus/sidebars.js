@@ -5,9 +5,11 @@ const sidebars = {
   docsSidebar: [
     'introduction',
     'getting-started',
+    'deployment',
     'architecture',
     'protocol',
-    'storage-and-replication',
+    'storage',
+    'replication',
     'roadmap',
     'contributing',
   ],

@@ -1,27 +1,27 @@
 # Getting Started
 
-This guide shows how to run the broker, publish events, consume them, and track consumer progress.
+This guide helps you run the broker, publish messages, consume them, and validate persistence behavior.
 
 ## Requirements
 
-- Go `1.22+`
-- `nc` (netcat) for manual TCP requests
+- Go `1.24+`
+- `nc` (netcat)
 
-## Start The Broker
+## Start Broker
 
 ```bash
 go run ./cmd/broker
 ```
 
-The broker listens on `localhost:9092` by default.
+Default listen address: `localhost:9092`.
 
-## Connect A Client
+## Connect Client
 
 ```bash
 nc localhost 9092
 ```
 
-## Publish Events
+## Publish Messages
 
 ```text
 V1|1|PRODUCE|orders user1:created
@@ -35,17 +35,13 @@ Example response:
 V1|1|OK|partition=2 offset=0
 ```
 
-The broker selects a partition from the message key and returns the assigned offset.
-
-## Consume Events
+## Consume Messages
 
 ```text
 V1|4|CONSUME|orders 2 0
 ```
 
-This reads topic `orders`, partition `2`, starting at offset `0`.
-
-## Use A Consumer Group
+## Consumer Group Flow
 
 ```text
 V1|5|JOIN|analytics orders consumer-a
@@ -53,18 +49,32 @@ V1|6|COMMIT|analytics orders 2 1
 V1|7|OFFSET|analytics orders 2
 ```
 
-- `JOIN` assigns partitions to a consumer.
-- `COMMIT` stores processed progress.
-- `OFFSET` reads the last committed offset.
+## Validate Error Handling
 
-## Common Usage Patterns
+```text
+V1|8|NOPE|x
+V1|9|CONSUME|orders bad 0
+```
 
-| Goal | Pattern |
-| --- | --- |
-| keep events for one entity ordered | use that entity ID as the message key |
-| replay historical events | consume from an earlier offset |
-| resume after restart | read the committed group offset |
-| share work across consumers | use the same consumer group |
+Expected: `UNKNOWN_COMMAND` or `BAD_REQUEST` responses.
+
+## Validate Persistence
+
+1. Produce a few messages.
+2. Stop broker.
+3. Start broker again.
+4. Consume from an earlier offset.
+
+You should get previously stored messages.
+
+## Validate Local Replica Files
+
+After producing messages, inspect `data/` for files like:
+
+```text
+orders-2-replica-1-segment-000000.log
+orders-2-replica-2-segment-000000.log
+```
 
 ## Run Tests
 

@@ -1,50 +1,54 @@
 # Roadmap
 
-This page explains what the project is trying to become next. It is intentionally separate from the usage docs so readers can distinguish current behavior from future design.
+This roadmap tracks product phases from current broker maturity to distributed production capabilities.
 
-## How To Read This Roadmap
+## Phase Status
 
-The project is being built in layers:
-
-1. harden the current broker behavior
-2. strengthen storage and durability
-3. add real distributed-system behavior
-4. add production operations and safety
-
-## Major Phases
-
-| Phase | Goal |
+| Phase | Status |
 | --- | --- |
-| Prototype hardening | stronger parsing, configuration, logging, and baseline tests |
-| Storage engine v1 | segmented logs, indexes, retention, recovery, durability knobs |
-| Replication and leadership | follower replication, ISR, high watermark, ack modes |
-| Consumer coordination v2 | heartbeats, rebalances, generation-aware commits |
-| Metadata quorum | controller service, leader election, broker registration, fencing |
-| Security and multi-tenancy | TLS, auth, ACLs, quotas |
-| Observability and operations | metrics, traces, admin tooling, runbooks |
-| Performance validation | benchmarks, soak tests, chaos tests, optimization |
+| Phase 0: Prototype hardening | Completed |
+| Phase 1: Storage engine v1 | Completed |
+| Phase 2: Replication and partition leadership | In progress |
+| Phase 3: Consumer coordination v2 | Planned |
+| Phase 4: Metadata quorum and control plane | Planned |
+| Phase 5: Security and multi-tenancy | Planned |
+| Phase 6: Observability and operations | Planned |
+| Phase 7: Performance and scale validation | Planned |
 
-## Near-Term Work
+## Completed Work
 
-The immediate engineering focus is on the pieces that make the current product safer to evolve:
+### Phase 0
 
-- explicit protocol envelopes and error codes
-- configuration validation
-- segmented log storage
-- broader unit-test coverage
-- CI automation
-- initial metrics support
+- protocol parsing hardening and response envelopes
+- environment-driven configuration and validation
+- structured JSON logging
+- baseline test coverage for core modules
+- protocol compatibility and error code registry
 
-## What “Production-Ready” Would Mean
+### Phase 1
 
-The project should only claim production readiness after it demonstrates:
+- segmented append-only logs
+- offset/time side indexes
+- startup replay and checksum validation
+- age/size retention flow
+- durability knobs for flush/fsync behavior
+- simplified local replica segment mirroring
 
-- durable storage with recovery guarantees
-- proven replication behavior under failure
-- operational visibility and runbooks
-- secure defaults
-- repeatable performance targets
+## Next Focus (Phase 2)
 
-Until then, the product should be described as an early-stage streaming broker rather than a production-grade distributed platform.
+- follower fetch replication protocol
+- partition leader/follower role transitions
+- ISR tracking and lag management
+- high watermark behavior
+- ack mode semantics for replication durability
 
-For the full execution plan, see the [production plan](https://github.com/srajandev98/real-time-event-streaming/blob/main/PLAN.md).
+## Production-Readiness Criteria
+
+Before production-grade claims, the product still needs:
+
+- distributed failover and replication correctness
+- security baseline (transport + authn/authz)
+- operational telemetry and runbooks
+- repeatable benchmark targets
+
+For the detailed execution plan, see [Production Plan](https://github.com/srajandev98/real-time-event-streaming/blob/main/PLAN.md).

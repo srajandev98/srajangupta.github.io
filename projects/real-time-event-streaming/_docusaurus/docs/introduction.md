@@ -6,22 +6,29 @@ slug: /
 
 Real-time Event Streaming is a Go-based event streaming broker for publishing, storing, and consuming ordered event streams.
 
-It provides a small streaming platform with:
+## Product Capabilities (Current)
 
-- append-only topic-partition logs
+- text-based TCP protocol (`V1`) with correlation IDs
 - deterministic key-based partition routing
-- offset-based message consumption
+- segmented append-only storage per topic-partition
+- offset and timestamp side indexes per partition
+- checksum validation during startup recovery
+- size- and age-based retention enforcement
 - consumer groups with partition assignment
-- persisted consumer offsets
+- persisted committed offsets (`offsets.json`)
+- structured JSON logs for runtime events
+- Docker and Docker Compose deployment flow
 
-## When To Use It
+## Current Deployment Model
 
-Use Real-time Event Streaming when you need to:
+The product currently runs as a single broker process with local filesystem persistence. It is suitable for local deployment, integration testing, and architecture exploration.
 
-- publish domain events such as order, payment, or activity updates
-- preserve message order within a partition
-- replay events from a known offset
-- distribute partition work across consumers in a group
+## Not Yet Available
+
+- multi-node network replication and ISR
+- leader election and metadata quorum
+- production-grade failover semantics
+- authn/authz and transport security defaults
 
 ## Product Concepts
 
@@ -29,28 +36,20 @@ Use Real-time Event Streaming when you need to:
 | --- | --- |
 | Topic | named stream of related events |
 | Partition | ordered shard within a topic |
-| Offset | position of a message within a partition |
-| Consumer group | consumers that share partition ownership |
-
-## Current Scope
-
-The current release supports a single-process broker with local file persistence and a text-based TCP protocol. It is suitable for local use, experimentation, and continued product development, but it is not yet a production-grade clustered streaming service.
-
-Not yet available:
-
-- distributed broker replication
-- leader election and metadata quorum
-- retention, compaction, batching, and compression
-- authentication and authorization
+| Offset | message position in a partition |
+| Segment | bounded log file chunk for a partition |
+| Consumer group | consumers sharing partition ownership |
 
 ## Documentation
 
-1. [Getting Started](getting-started.md): run the broker and publish your first events.
-2. [Protocol](protocol.md): request and response formats.
-3. [Architecture](architecture.md): runtime components and request flow.
-4. [Storage and Replication](storage-and-replication.md): persistence behavior and replication status.
-5. [Roadmap](roadmap.md): planned product capabilities.
-6. [Contributing](contributing.md): development workflow.
+1. [Getting Started](getting-started.md): run and test broker behavior quickly.
+2. [Deployment](deployment.md): container and native deployment options.
+3. [Protocol](protocol.md): wire format and command contract.
+4. [Architecture](architecture.md): runtime modules and request flow.
+5. [Storage](storage.md): segment format, indexes, retention, recovery, durability knobs.
+6. [Replication](replication.md): current local replica behavior and next replication milestones.
+7. [Roadmap](roadmap.md): completed and upcoming phases.
+8. [Contributing](contributing.md): development workflow.
 
 ## Source of Truth
 
