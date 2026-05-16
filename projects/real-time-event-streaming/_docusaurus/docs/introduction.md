@@ -46,10 +46,11 @@ The product currently runs as a single broker process with local filesystem pers
 2. [Deployment](deployment.md): container and native deployment options.
 3. [Protocol](protocol.md): wire format and command contract.
 4. [Architecture](architecture.md): runtime modules and request flow.
-5. [Storage](storage.md): segment format, indexes, retention, recovery, durability knobs.
-6. [Replication](replication.md): current local replica behavior and next replication milestones.
-7. [Roadmap](roadmap.md): completed and upcoming phases.
-8. [Contributing](contributing.md): development workflow.
+5. [TypeScript SDK](typescript-sdk.md): integrate RTES from Node.js projects.
+6. [Storage](storage.md): segment format, indexes, retention, recovery, durability knobs.
+7. [Replication](replication.md): current local replica behavior and next replication milestones.
+8. [Roadmap](roadmap.md): completed and upcoming phases.
+9. [Contributing](contributing.md): development workflow.
 
 ## Source of Truth
 

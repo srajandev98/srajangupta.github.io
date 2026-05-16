@@ -8,6 +8,7 @@ const sidebars = {
     'deployment',
     'architecture',
     'protocol',
+    'typescript-sdk',
     'storage',
     'replication',
     'roadmap',
