@@ -81,6 +81,13 @@ const config = {
             },
           ],
         },
+        {
+          title: 'Links',
+          items: [
+            { label: 'GitHub', href: 'https://github.com/srajandev98/real-time-event-streaming' },
+            { label: 'Home', href: 'https://srajangupta.com' },
+          ],
+        },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Srajan Gupta`,
     },
