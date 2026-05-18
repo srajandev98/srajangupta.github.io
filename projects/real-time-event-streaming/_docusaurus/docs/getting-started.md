@@ -24,21 +24,35 @@ nc localhost 9092
 ## Publish Messages
 
 ```text
-V1|1|PRODUCE|orders user1:created
-V1|2|PRODUCE|orders user1:paid
-V1|3|PRODUCE|orders user2:shipped
+V1|1|PRODUCE|orders user1:created acks=1
+V1|2|PRODUCE|orders user1:paid acks=all
+V1|3|PRODUCE|orders user2:shipped acks=0
 ```
 
 Example response:
 
 ```text
-V1|1|OK|partition=2 offset=0
+V1|1|OK|partition=2 offset=0 hw=0
 ```
 
 ## Consume Messages
 
 ```text
 V1|4|CONSUME|orders 2 0
+```
+
+`CONSUME` returns only committed records (up to high watermark).
+
+## Simulate Follower Replication Progress
+
+```text
+V1|10|REPLICA_FETCH|orders 2 1 0
+```
+
+Example response:
+
+```text
+V1|10|OK|replica=1 acked_offset=0 hw=0 isr=[0 1] under_replicated=false
 ```
 
 ## Consumer Group Flow

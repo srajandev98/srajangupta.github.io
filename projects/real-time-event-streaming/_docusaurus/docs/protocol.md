@@ -14,6 +14,12 @@ Example:
 V1|42|PRODUCE|orders user1:created
 ```
 
+With explicit ack mode:
+
+```text
+V1|43|PRODUCE|orders user1:created acks=all
+```
+
 ## Response Format
 
 Success:
@@ -33,11 +39,12 @@ V1|<correlation_id>|ERR|<code>|<message>
 
 | Command | Arguments | Purpose |
 | --- | --- | --- |
-| `PRODUCE` | `<topic> <key>:<value>` | append one message |
-| `CONSUME` | `<topic> <partition> <offset>` | read messages from offset |
-| `JOIN` | `<group> <topic> <consumer_id>` | join a group and get assignments |
-| `COMMIT` | `<group> <topic> <partition> <offset>` | persist processed progress |
-| `OFFSET` | `<group> <topic> <partition>` | read committed progress |
+| `PRODUCE` | `&lt;topic&gt; &lt;key&gt;:&lt;value&gt; [acks=0|1|all]` | append one message |
+| `CONSUME` | `&lt;topic&gt; &lt;partition&gt; &lt;offset&gt;` | read messages from offset |
+| `JOIN` | `&lt;group&gt; &lt;topic&gt; &lt;consumer_id&gt;` | join a group and get assignments |
+| `COMMIT` | `&lt;group&gt; &lt;topic&gt; &lt;partition&gt; &lt;offset&gt;` | persist processed progress |
+| `OFFSET` | `&lt;group&gt; &lt;topic&gt; &lt;partition&gt;` | read committed progress |
+| `REPLICA_FETCH` | `&lt;topic&gt; &lt;partition&gt; &lt;replica_id&gt; &lt;offset&gt;` | report follower replication progress |
 
 ## Error Codes
 
@@ -45,6 +52,7 @@ V1|<correlation_id>|ERR|<code>|<message>
 | --- | --- |
 | `BAD_REQUEST` | malformed envelope or invalid command args |
 | `UNKNOWN_COMMAND` | unsupported command |
+| `REPLICATION_TIMEOUT` | `acks=all` could not be satisfied before timeout |
 
 ## Validation Rules
 
@@ -56,6 +64,13 @@ The parser enforces:
 - non-empty command
 
 Handlers then enforce command-specific argument rules.
+
+## Replication Semantics (Current)
+
+- `acks=0`: accepted by protocol, currently behaves like immediate leader success response.
+- `acks=1`: leader append acknowledgement.
+- `acks=all`: waits until partition high watermark reaches produced offset and min ISR is satisfied, otherwise returns `REPLICATION_TIMEOUT`.
+- `CONSUME` returns only committed records (up to high watermark).
 
 ## Compatibility Policy (Current)
 

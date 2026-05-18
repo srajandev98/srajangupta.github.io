@@ -1,34 +1,41 @@
 # Replication
 
-This page describes current replication behavior and planned replication milestones.
+This page describes current replication behavior and near-term direction.
 
 ## Replication Status (Current)
 
-Current replication is simplified local mirroring on the same node.
+Current implementation has two layers:
 
-For produced records, broker also writes local replica segment files:
+1. Local replica file mirroring (same node) for storage-flow visibility.
+2. In-memory replication manager for ISR, high watermark, and `acks=all` behavior.
+
+For produced records, broker writes local replica segment files:
 
 ```text
 data/orders-2-replica-1-segment-000000.log
 data/orders-2-replica-2-segment-000000.log
 ```
 
-This helps with development visibility and storage-flow validation, but it is not distributed replication.
+This is still not true multi-broker network replication.
 
 ## What It Does Today
 
 - mirrors produced records into local replica files
-- preserves record payload and log-line format in replicas
-- keeps replica files separate from leader segment files
+- tracks leader offset per partition
+- tracks follower progress via `REPLICA_FETCH`
+- maintains ISR membership using lag + freshness rules
+- computes partition high watermark from ISR offsets
+- supports `acks=1` and `acks=all` semantics in produce path
+- gates consume visibility to committed data (up to high watermark)
+- emits under-replicated partition warnings
 
 ## What It Does Not Do Yet
 
 - follower fetch over network
-- in-sync replica (ISR) management
-- high watermark-based read visibility
 - leader/follower role transitions
-- replica lag metrics and ISR shrink/expand
-- replication ack quorum semantics (`acks=1`, `acks=all`)
+- metadata quorum-backed replica membership
+- broker-to-broker transport security
+- persistent replication metadata across process restarts
 
 ## Planned Direction
 
@@ -36,8 +43,8 @@ Replication will move from local file mirrors to networked broker-to-broker repl
 
 Near-term goals:
 
-1. follower replication protocol
-2. partition leadership transitions
-3. ISR + lag tracking
-4. high watermark semantics
-5. acknowledgement mode support
+1. network follower fetch/replication protocol
+2. deterministic partition leadership transitions
+3. replica lag metrics and alerting hooks
+4. durable metadata/controller integration
+5. failover tests for committed-read guarantees
