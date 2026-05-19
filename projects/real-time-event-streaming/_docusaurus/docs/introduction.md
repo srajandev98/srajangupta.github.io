@@ -25,7 +25,7 @@ The product currently runs as a single broker process with local filesystem pers
 
 ## Not Yet Available
 
-- multi-node network replication and ISR
+- multi-node network replication (current ISR is single-node/in-memory simulation)
 - leader election and metadata quorum
 - production-grade failover semantics
 - authn/authz and transport security defaults

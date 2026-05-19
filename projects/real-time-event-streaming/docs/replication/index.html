@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.10.1">
 <title data-rh="true">Replication | Real-time Event Streaming</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://srajangupta.com/projects/real-time-event-streaming/docs/replication"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Replication | Real-time Event Streaming"><meta data-rh="true" name="description" content="This page describes current replication behavior and near-term direction."><meta data-rh="true" property="og:description" content="This page describes current replication behavior and near-term direction."><link data-rh="true" rel="canonical" href="https://srajangupta.com/projects/real-time-event-streaming/docs/replication"><link data-rh="true" rel="alternate" href="https://srajangupta.com/projects/real-time-event-streaming/docs/replication" hreflang="en"><link data-rh="true" rel="alternate" href="https://srajangupta.com/projects/real-time-event-streaming/docs/replication" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Replication","item":"https://srajangupta.com/projects/real-time-event-streaming/docs/replication"}]}</script><link rel="stylesheet" href="/projects/real-time-event-streaming/docs/assets/css/styles.dfe0e291.css">
-<script src="/projects/real-time-event-streaming/docs/assets/js/runtime~main.03ca620b.js" defer="defer"></script>
+<script src="/projects/real-time-event-streaming/docs/assets/js/runtime~main.3e68c3aa.js" defer="defer"></script>
 <script src="/projects/real-time-event-streaming/docs/assets/js/main.c07449f7.js" defer="defer"></script>
 </head>
 <body>
@@ -32,6 +32,23 @@
 <li class="">supports <code>acks=1</code> and <code>acks=all</code> semantics in produce path</li>
 <li class="">gates consume visibility to committed data (up to high watermark)</li>
 <li class="">emits under-replicated partition warnings</li>
+</ul>
+<p>Important details:</p>
+<ul>
+<li class="">leader replica id is implicit <code>0</code></li>
+<li class="">follower replica ids are <code>1..(replication_factor-1)</code></li>
+<li class=""><code>acks=all</code> waits until:<!-- -->
+<ul>
+<li class="">high watermark reaches produced offset</li>
+<li class="">ISR size is at least <code>min.insync.replicas</code></li>
+</ul>
+</li>
+<li class="">follower ISR eligibility requires:<!-- -->
+<ul>
+<li class="">last ack seen within <code>replica lag timeout</code></li>
+<li class="">offset lag less than or equal to <code>max replica lag</code></li>
+</ul>
+</li>
 </ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="what-it-does-not-do-yet">What It Does Not Do Yet<a href="#what-it-does-not-do-yet" class="hash-link" aria-label="Direct link to What It Does Not Do Yet" title="Direct link to What It Does Not Do Yet" translate="no">​</a></h2>
 <ul>

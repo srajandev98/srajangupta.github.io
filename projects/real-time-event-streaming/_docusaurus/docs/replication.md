@@ -29,6 +29,17 @@ This is still not true multi-broker network replication.
 - gates consume visibility to committed data (up to high watermark)
 - emits under-replicated partition warnings
 
+Important details:
+
+- leader replica id is implicit `0`
+- follower replica ids are `1..(replication_factor-1)`
+- `acks=all` waits until:
+  - high watermark reaches produced offset
+  - ISR size is at least `min.insync.replicas`
+- follower ISR eligibility requires:
+  - last ack seen within `replica lag timeout`
+  - offset lag less than or equal to `max replica lag`
+
 ## What It Does Not Do Yet
 
 - follower fetch over network

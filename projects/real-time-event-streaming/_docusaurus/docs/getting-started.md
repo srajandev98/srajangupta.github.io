@@ -25,14 +25,13 @@ nc localhost 9092
 
 ```text
 V1|1|PRODUCE|orders user1:created acks=1
-V1|2|PRODUCE|orders user1:paid acks=all
-V1|3|PRODUCE|orders user2:shipped acks=0
+V1|2|PRODUCE|orders user1:paid acks=0
 ```
 
 Example response:
 
 ```text
-V1|1|OK|partition=2 offset=0 hw=0
+V1|1|OK|partition=2 offset=0 hw=-1
 ```
 
 ## Consume Messages
@@ -42,6 +41,8 @@ V1|4|CONSUME|orders 2 0
 ```
 
 `CONSUME` returns only committed records (up to high watermark).
+
+Before follower ack is reported, high watermark can stay at `-1` and consume can return empty payload for that partition.
 
 ## Simulate Follower Replication Progress
 
@@ -53,6 +54,18 @@ Example response:
 
 ```text
 V1|10|OK|replica=1 acked_offset=0 hw=0 isr=[0 1] under_replicated=false
+```
+
+Now an `acks=all` write can succeed for the same partition:
+
+```text
+V1|11|PRODUCE|orders user2:shipped acks=all
+```
+
+If ISR is below `RTES_MIN_ISR` or follower progress is stale, you may get:
+
+```text
+V1|11|ERR|REPLICATION_TIMEOUT|acks=all timeout
 ```
 
 ## Consumer Group Flow
@@ -71,6 +84,8 @@ V1|9|CONSUME|orders bad 0
 ```
 
 Expected: `UNKNOWN_COMMAND` or `BAD_REQUEST` responses.
+
+Note: malformed protocol lines (bad envelope/version) return errors with correlation id `0`.
 
 ## Validate Persistence
 

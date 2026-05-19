@@ -11,6 +11,7 @@ Distributed Object Storage separates request handling, metadata transactions, fi
 | Repository | performs PostgreSQL transactions |
 | Storage adapter | reads and writes object bytes |
 | Replication worker | processes durable replication jobs |
+| Migrator | auto-applies embedded SQL migrations on startup |
 
 ## Upload Path
 
@@ -19,6 +20,12 @@ request -> path validation -> primary write -> metadata transaction -> replicati
 ```
 
 The metadata row and replication job are committed together so secondary-copy work is not lost after a successful upload.
+
+Within the same upload transaction:
+
+1. previous latest row for `(bucket, object_key)` is unset
+2. new object row is inserted with `is_latest=true`
+3. replication job row is inserted
 
 ## Replication Path
 
@@ -30,6 +37,12 @@ pending -> running -> failed
 
 The worker retries transient failures and records terminal failures after retry exhaustion.
 
+Current implementation details:
+
+- job claiming uses `FOR UPDATE SKIP LOCKED` for safe concurrent workers
+- retry backoff is quadratic (`attempt_count^2` seconds)
+- replica records are idempotent per `(object_id, node_name)`
+
 ## Deployment Model
 
-The current release uses local filesystem nodes and PostgreSQL. Future releases are expected to add migrations, stronger operational controls, authentication, and broader object-storage APIs.
+The current release uses local filesystem nodes and PostgreSQL with startup schema migration application. Future releases are expected to add stronger operational controls, authentication, and broader object-storage APIs.

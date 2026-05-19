@@ -20,6 +20,12 @@ With explicit ack mode:
 V1|43|PRODUCE|orders user1:created acks=all
 ```
 
+The parser always expects four `|`-separated fields. Commands with no args must still include a trailing `|`, for example:
+
+```text
+V1|99|PING|
+```
+
 ## Response Format
 
 Success:
@@ -33,6 +39,12 @@ Error:
 
 ```text
 V1|<correlation_id>|ERR|<code>|<message>
+```
+
+If a request cannot be parsed, broker responds with correlation id `0`:
+
+```text
+V1|0|ERR|BAD_REQUEST|...
 ```
 
 ## Supported Commands
@@ -65,12 +77,30 @@ The parser enforces:
 
 Handlers then enforce command-specific argument rules.
 
+Additional handler-level validation:
+
+- `PRODUCE` requires `key:value` message payload
+- `PRODUCE` ack mode must be exactly `acks=0`, `acks=1`, or `acks=all`
+- `CONSUME`, `COMMIT`, `OFFSET`, `REPLICA_FETCH` numeric fields must be valid integers
+- `REPLICA_FETCH` `replica_id` must be in range `1..(replication_factor-1)` (`0` is the leader)
+
 ## Replication Semantics (Current)
 
 - `acks=0`: accepted by protocol, currently behaves like immediate leader success response.
 - `acks=1`: leader append acknowledgement.
 - `acks=all`: waits until partition high watermark reaches produced offset and min ISR is satisfied, otherwise returns `REPLICATION_TIMEOUT`.
 - `CONSUME` returns only committed records (up to high watermark).
+
+## Command Payloads (Current)
+
+Response payloads are plain key-value text and may evolve additively.
+
+- `PRODUCE`: `partition=<n> offset=<n> hw=<n>`
+- `CONSUME`: `messages=<offset:value,...> hw=<n>` (empty `messages=` when nothing committed at requested offset)
+- `JOIN`: `assigned=[<partition ids>]`
+- `COMMIT`: `committed=true`
+- `OFFSET`: `offset=<n>`
+- `REPLICA_FETCH`: `replica=<id> acked_offset=<n> hw=<n> isr=[...] under_replicated=<bool>`
 
 ## Compatibility Policy (Current)
 

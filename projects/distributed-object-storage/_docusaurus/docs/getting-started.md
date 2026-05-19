@@ -35,19 +35,26 @@ APP_SECRET=replace_with_strong_secret
 
 `APP_SECRET` signs presigned download URLs. Use a real secret outside local development.
 
+The service currently uses these fixed runtime values:
+
+- HTTP bind: `:8080`
+- storage nodes: `storage/node1`, `storage/node2`, `storage/node3`
+
+Run from repository root so `.env` is discovered automatically by startup.
+
 ## Step 2: Prepare The Database
 
-Current state:
+Current behavior:
 
-- `objects` and `replicas` tables must already exist
-- `replication_jobs` is created or ensured at startup
+- schema migrations are auto-applied at startup
+- applied migration versions are tracked in `schema_migrations`
 
-Schema migrations are planned but not yet the source of truth, so database preparation is still partly manual.
+You only need a reachable PostgreSQL database matching your `.env` values.
 
 ## Step 3: Start The Service
 
 ```bash
-go run ./cmd/server
+go run ./core/cmd/server
 ```
 
 Default address:
@@ -101,6 +108,15 @@ What to expect:
 - `pending` or `running` shortly after upload is normal
 - `completed` means secondary replication finished
 - `failed` means retries were exhausted and intervention is needed
+
+To inspect retry schedule:
+
+```sql
+SELECT id, status, attempt_count, max_attempts, next_run_at, last_error
+FROM replication_jobs
+ORDER BY id DESC
+LIMIT 20;
+```
 
 ## What You Just Proved
 

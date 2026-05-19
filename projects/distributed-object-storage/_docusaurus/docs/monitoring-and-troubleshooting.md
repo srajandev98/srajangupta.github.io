@@ -19,6 +19,12 @@ LIMIT 50;
 ```
 
 ```sql
+SELECT id, version
+FROM schema_migrations
+ORDER BY id;
+```
+
+```sql
 SELECT object_id, node_name, file_path, status
 FROM replicas
 ORDER BY object_id DESC
@@ -33,7 +39,16 @@ LIMIT 50;
 | `pending` with future `next_run_at` | normal retry backoff window |
 | no jobs being claimed | worker may not be running |
 | upload succeeds but replicas missing | expected until async replication completes |
+| repeated `pending`/`running` loops with growing `attempt_count` | replication keeps failing and retrying |
 
 ## Current Observability Gap
 
 The project does not yet expose the richer signals an operator would want in production, such as request IDs, Prometheus metrics, queue depth dashboards, or health endpoints. Those are planned work, not hidden features.
+
+## Quick Recovery Playbook
+
+1. Ensure service process is running and DB is reachable.
+2. Check latest `replication_jobs` rows for `last_error` and `attempt_count`.
+3. Verify source object file exists at `source_file_path`.
+4. Verify secondary node directories (`storage/node2`, `storage/node3`) are writable.
+5. Fix root cause and allow retries; terminal `failed` jobs currently require manual replay tooling.

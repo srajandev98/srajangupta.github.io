@@ -21,6 +21,11 @@ This guide covers product deployment for local and server environments.
 | `RTES_LISTEN_ADDR` | `:9092` | broker listen address |
 | `RTES_DATA_DIR` | `data` (native) / `/app/data` (container) | storage root |
 | `RTES_NUM_PARTITIONS` | `3` | partition count |
+| `RTES_REPLICATION_FACTOR` | `3` | total replicas per partition (leader + followers, local simulation) |
+| `RTES_MIN_ISR` | `2` | minimum ISR required for committed writes |
+| `RTES_REPLICA_MAX_LAG` | `0` | max offset lag to remain in ISR |
+| `RTES_REPLICA_LAG_TIMEOUT_MS` | `10000` | follower freshness timeout for ISR |
+| `RTES_ACK_ALL_TIMEOUT_MS` | `2000` | timeout for `acks=all` produce waits |
 | `RTES_SEGMENT_MAX_BYTES` | `1048576` | segment rollover threshold |
 | `RTES_RETENTION_MAX_BYTES` | `52428800` | retention by max bytes |
 | `RTES_RETENTION_MAX_AGE_SECONDS` | `86400` | retention by max age |
@@ -91,6 +96,8 @@ Run:
 RTES_LISTEN_ADDR=:9092 \
 RTES_DATA_DIR=./data \
 RTES_NUM_PARTITIONS=3 \
+RTES_REPLICATION_FACTOR=3 \
+RTES_MIN_ISR=2 \
 ./bin/rtes-broker
 ```
 
