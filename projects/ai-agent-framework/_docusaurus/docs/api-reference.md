@@ -47,6 +47,48 @@ Runtime behavior:
 - memory context injection
 - max-step enforcement
 
+Config details:
+
+- `tools` are registered by unique tool name
+- `passes` can transform interpreted instructions before execution
+- `hooks.onStart(state)` and `hooks.onEnd(state, result)` allow lifecycle instrumentation
+- `maxSteps` defaults to `20`
+
+## Tools
+
+### `tool(...)`
+
+```ts
+tool({
+  name,
+  description,
+  schema,      // zod schema
+  execute      // async handler
+})
+```
+
+Behavior:
+
+- args are validated against `schema` before execution
+- unknown tool names raise `ToolNotFoundError`
+- schema mismatch raises `ToolValidationError`
+
+## Workflows
+
+### `Workflow`
+
+```ts
+new Workflow({ steps })
+workflow.run(input, { resumeFrom? })
+```
+
+Types:
+
+- `WorkflowStep`: `{ id, run, when? }`
+- `WorkflowSnapshot`: captured per-step input/output metadata
+- `WorkflowResumeState`: replayable state with `nextStepIndex`, `data`, `snapshots`
+- `WorkflowRunResult`: `{ output, snapshots, resumeState }`
+
 ## Errors
 
 - `ToolNotFoundError`

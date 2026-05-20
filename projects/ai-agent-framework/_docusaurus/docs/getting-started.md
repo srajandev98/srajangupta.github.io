@@ -75,10 +75,29 @@ const agent = new Agent({
 const output = await agent.run("What is the weather in Delhi?");
 ```
 
+## Build A Resumable Workflow
+
+```ts
+import { Workflow } from "@ai-agent-framework/core";
+
+const workflow = new Workflow({
+  steps: [
+    { id: "normalize", run: (input: string) => input.trim() },
+    { id: "classify", run: (text: string) => ({ text, priority: "high" }) }
+  ]
+});
+
+const result = await workflow.run("  investigate latency spike  ");
+// result.output
+// result.snapshots
+// result.resumeState
+```
+
 ## Validate The Repository
 
 ```bash
 pnpm lint
+pnpm typecheck
 pnpm test --run
 pnpm --filter @ai-agent-framework/core build
 pnpm --filter @ai-agent-framework/openai build

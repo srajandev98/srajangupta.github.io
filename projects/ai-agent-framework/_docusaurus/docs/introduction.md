@@ -12,6 +12,7 @@ AI Agent Framework is a TypeScript framework for building AI chains and tool-usi
 - prompt templates and output parsers
 - model adapters for provider integration
 - agent runtime with tool execution
+- resumable `Workflow` primitive with step snapshots
 - typed building blocks for application code
 
 ## When To Use It
@@ -35,7 +36,7 @@ Use AI Agent Framework when you need to:
 
 ## Current Scope
 
-The current MVP includes runnable composition, prompt templates, parsers, OpenAI provider integration, and a tool-capable agent runtime. Retriever primitives, richer memory support, and additional provider adapters remain planned work.
+The current MVP includes runnable composition, prompt templates, parsers, OpenAI provider integration, workflow snapshots/resume state, and a tool-capable agent runtime. Retriever primitives, richer memory support, and additional provider adapters remain planned work.
 
 ## Documentation
 
